@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPixie\Template\Locators\Locator;
+namespace PHPixie\Filesystem\Locators\Locator;
 
-class Prefix implements \PHPixie\Template\Locators\Locator
+class Prefix implements \PHPixie\Filesystem\Locators\Locator
 {
     protected $locators = array();
     protected $defaultPrefix;
@@ -19,7 +19,7 @@ class Prefix implements \PHPixie\Template\Locators\Locator
     }
     
     
-    public function getTemplateFile($name)
+    public function locate($name)
     {
         $split = explode(':', $name, 2);
         if(count($split) > 1) {
@@ -30,6 +30,6 @@ class Prefix implements \PHPixie\Template\Locators\Locator
             $name = $name;
         }
         
-        return $this->locators[$prefix]->getTemplateFile($name);
+        return $this->locators[$prefix]->locate($name);
     }
 }

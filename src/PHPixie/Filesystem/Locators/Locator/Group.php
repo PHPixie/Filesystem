@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPixie\Template\Locators\Locator;
+namespace PHPixie\Filesystem\Locators\Locator;
 
 class Group
 {
@@ -15,11 +15,11 @@ class Group
         }
     }
     
-    public function getTemplateFile($name)
+    public function locate($name)
     {
         $path = null;
         foreach($this->locators as $locator) {
-            $path = $locator->getTemplateFile($name);
+            $path = $locator->locate($name);
             if($path !== null) {
                 break;
             }

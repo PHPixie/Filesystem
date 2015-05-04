@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPixie\Template\Locators\Locator;
+namespace PHPixie\Filesystem\Locators\Locator;
 
-class Directory implements \PHPixie\Template\Locators\Locator
+class Directory implements \PHPixie\Filesystem\Locators\Locator
 {
     protected $root;
     protected $directory;
@@ -15,15 +15,16 @@ class Directory implements \PHPixie\Template\Locators\Locator
         $this->defaultExtension = $configData->get('defaultExtension', 'php');
     }
     
-    public function getTemplateFile($path)
+    public function locate($path)
     {
-        $path = $root->path($path);
+        $path = $this->directory.'/'.$path;
+        $path = $this->root->path($path);
+        
         $extension = pathinfo($path, PATHINFO_EXTENSION);
         if($extension === '') {
             $path.='.'.$this->defaultExtension;
         }
         
-        $path = $this->directory.'/'.$path;
         if(!file_exists($path)) {
             $path = null;
         }

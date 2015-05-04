@@ -1,7 +1,7 @@
 <?php
 
-namespace PHPixie\Template\Locators;
+namespace PHPixie\Filesystem\Locators;
 
 interface Locator{
-    public function getTemplateFile($name);
+    public function locate($name);
 }
