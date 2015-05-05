@@ -1,7 +1,7 @@
 {
-    "name": "phpixie/http",
-    "description": "HTTP library for PHPixie, implements the PSR-7 standard",
-    "keywords": ["http", "psr-7"],
+    "name": "phpixie/filesystem",
+    "description": "Filesystem wrappers for PHPixie",
+    "keywords": ["filesystem", "file"],
     "homepage": "http://phpixie.com",
     "type": "library",
     "license": "BSD",
@@ -13,8 +13,7 @@
         }
     ],
     "require": {
-        "phpixie/slice": "3.*@dev",
-        "psr/http-message": "1.0.*@dev"
+        "phpixie/slice": "3.*@dev"
     },
     "require-dev": {
         "phpixie/test": "3.*@dev"
