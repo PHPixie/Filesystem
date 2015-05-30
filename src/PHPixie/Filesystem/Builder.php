@@ -5,11 +5,14 @@ namespace PHPixie\Filesystem;
 class Builder
 {
     protected $rootDir;
+    protected $locatorRegistry;
+    
     protected $instances = array();
     
-    public function __construct($rootDir)
+    public function __construct($rootDir, $locatorRegistry = null)
     {
-        $this->rootDir = $rootDir;
+        $this->rootDir         = $rootDir;
+        $this->locatorRegistry = $locatorRegistry;
     }
     
     public function root()
@@ -29,7 +32,7 @@ class Builder
     
     protected function buildLocators()
     {
-        return new Locators($this);
+        return new Locators($this, $this->locatorRegistry);
     }
     
     protected function instance($name)

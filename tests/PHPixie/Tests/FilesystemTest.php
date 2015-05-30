@@ -8,6 +8,8 @@ namespace PHPixie\Tests;
 class FilesystemTest extends \PHPixie\Test\Testcase
 {
     protected $rootDir = '/pixie/';
+    protected $locatorRegistry;
+    
     protected $filesystem;
     
     protected $builder;
@@ -17,6 +19,8 @@ class FilesystemTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
+        $this->locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
+        
         $this->filesystem = $this->getMockBuilder('\PHPixie\Filesystem')
             ->setMethods(array('buildBuilder'))
             ->disableOriginalConstructor()
@@ -24,11 +28,13 @@ class FilesystemTest extends \PHPixie\Test\Testcase
         
         $this->builder = $this->quickMock('\PHPixie\Filesystem\Builder');
         $this->method($this->filesystem, 'buildBuilder', $this->builder, array(
-            $this->rootDir
+            $this->rootDir,
+            $this->locatorRegistry
         ), 0);
         
         $this->filesystem->__construct(
-            $this->rootDir
+            $this->rootDir,
+            $this->locatorRegistry
         );
         
         $this->root = $this->quickMock('\PHPixie\Filesystem\Root');
@@ -98,12 +104,24 @@ class FilesystemTest extends \PHPixie\Test\Testcase
     public function testBuildBuilder()
     {
         $this->filesystem = new \PHPixie\Filesystem(
+            $this->rootDir,
+            $this->locatorRegistry
+        );
+        
+        $builder = $this->filesystem->builder();
+        $this->assertInstance($builder, '\PHPixie\Filesystem\Builder', array(
+            'rootDir'         => $this->rootDir,
+            'locatorRegistry' => $this->locatorRegistry
+        ));
+        
+        $this->filesystem = new \PHPixie\Filesystem(
             $this->rootDir
         );
         
         $builder = $this->filesystem->builder();
         $this->assertInstance($builder, '\PHPixie\Filesystem\Builder', array(
-            'rootDir' => $this->rootDir
+            'rootDir'         => $this->rootDir,
+            'locatorRegistry' => null
         ));
     }
 }

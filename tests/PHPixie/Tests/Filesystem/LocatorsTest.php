@@ -8,14 +8,21 @@ namespace PHPixie\Tests\Filesystem;
 class LocatorsTest extends \PHPixie\Test\Testcase
 {
     protected $builder;
+    protected $locatorRegistry;
+    
     protected $locators;
     
     protected $root;
     
     public function setUp()
     {
-        $this->builder  = $this->quickMock('\PHPixie\Filesystem\Builder');
-        $this->locators = new \PHPixie\Filesystem\Locators($this->builder);
+        $this->builder          = $this->quickMock('\PHPixie\Filesystem\Builder');
+        $this->locatorRegistry  = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
+        
+        $this->locators = new \PHPixie\Filesystem\Locators(
+            $this->builder,
+            $this->locatorRegistry
+        );
         
         $this->root = $this->quickMock('\PHPixie\Filesystem\Root');
         $this->method($this->builder, 'root', $this->root, array());
@@ -75,12 +82,34 @@ class LocatorsTest extends \PHPixie\Test\Testcase
     }
     
     /**
+     * @covers ::mount
+     * @covers ::<protected>
+     */
+    public function testMount()
+    {
+        $configData = $this->getTypeConfig('mount');
+        
+        $subLocator = $this->quickMock('\PHPixie\Filesystem\Locators\Locator');
+        $this->method($this->locatorRegistry, 'get', $subLocator, array('pixie'), 0);
+
+        $locator = $this->locators->mount($configData);
+        $this->assertInstance($locator, '\PHPixie\Filesystem\Locators\Locator\Mount', array(
+            'locator' => $subLocator
+        ));
+        
+        $locators = new \PHPixie\Filesystem\Locators($this->builder);
+        $this->assertException(function() use($locators, $configData) {
+            $locators->mount($configData);
+        }, '\PHPixie\Filesystem\Exception');
+    }
+    
+    /**
      * @covers ::buildFromConfig
      * @covers ::<protected>
      */
     public function testBuildFromConfig()
     {
-        foreach(array('directory', 'group', 'prefix') as $type) {
+        foreach(array('directory', 'group', 'prefix', 'mount') as $type) {
             $configData = $this->getTypeConfig($type);
             $locator = $this->locators->buildFromConfig($configData);
             $this->assertInstance($locator, '\PHPixie\Filesystem\Locators\Locator\\'.ucfirst($type));
@@ -116,6 +145,14 @@ class LocatorsTest extends \PHPixie\Test\Testcase
             return $this->getConfigData(array(
                 'defaultPrefix' => 'default',
                 'type' => 'prefix'
+            ), $locatorsConfig);
+        }
+        
+        if($type === 'mount') {
+            $locatorsConfig = $this->getConfigData();
+            return $this->getConfigData(array(
+                'name' => 'pixie',
+                'type' => 'mount'
             ), $locatorsConfig);
         }
         

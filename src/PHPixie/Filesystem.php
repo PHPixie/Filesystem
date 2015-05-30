@@ -6,9 +6,9 @@ class Filesystem
 {
     protected $builder;
     
-    public function __construct($rootDir)
+    public function __construct($rootDir, $locatorRegistry = null)
     {
-        $this->builder = $this->buildBuilder($rootDir);
+        $this->builder = $this->buildBuilder($rootDir, $locatorRegistry);
     }
     
     public function builder()
@@ -33,8 +33,8 @@ class Filesystem
         return $locators->buildFromConfig($configData);
     }
     
-    protected function buildBuilder($rootDir)
+    protected function buildBuilder($rootDir, $locatorRegistry)
     {
-        return new Filesystem\Builder($rootDir);
+        return new Filesystem\Builder($rootDir, $locatorRegistry);
     }
 }

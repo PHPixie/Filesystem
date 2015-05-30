@@ -5,14 +5,20 @@ namespace PHPixie\Tests\Filesystem;
 /**
  * @coversDefaultClass \PHPixie\Filesystem\Builder
  */
-class BuildersTest extends \PHPixie\Test\Testcase
+class BuilderTest extends \PHPixie\Test\Testcase
 {
     protected $rootDir = '/pixie/';
+    protected $locatorRegistry;
+    
     protected $builders;
     
     public function setUp()
     {
-        $this->builder = new \PHPixie\Filesystem\Builder($this->rootDir);
+        $this->locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
+        $this->builder = new \PHPixie\Filesystem\Builder(
+            $this->rootDir,
+            $this->locatorRegistry
+        );
     }
     
     /**
@@ -46,9 +52,16 @@ class BuildersTest extends \PHPixie\Test\Testcase
     {
         $locators = $this->builder->locators();
         $this->assertInstance($locators, '\PHPixie\Filesystem\Locators', array(
-            'builder' => $this->builder
+            'builder'         => $this->builder,
+            'locatorRegistry' => $this->locatorRegistry,
         ));
         
         $this->assertSame($locators, $this->builder->locators());
+        
+        $this->builder = new \PHPixie\Filesystem\Builder($this->rootDir);
+        $this->assertInstance($this->builder->locators(), '\PHPixie\Filesystem\Locators', array(
+            'builder'         => $this->builder,
+            'locatorRegistry' => null,
+        ));
     }
 }
