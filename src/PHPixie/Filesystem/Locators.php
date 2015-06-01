@@ -46,22 +46,14 @@ class Locators
     
     public function mount($configData)
     {
-        if ($this->locatorRegistry === null) {
-            throw new \PHPixie\Filesystem\Exception("Locator registry was not set");
-        }
-        
         return new Locators\Locator\Mount(
             $this->locatorRegistry,
             $configData
         );
     }
     
-    public function buildFromConfig($configData) {
-        $type = $configData->get('type', 'directory');
-        if(!in_array($type, $this->locators, true)) {
-            throw new \PHPixie\Filesystem\Exception("Locator type '$type' does not exist");
-        }
-        
-        return $this->$type($configData);
+    public function build($configData, $rootPath = null, $locatorRegistry = null) {
+        $builder = $this->locatorBuilder($rootPath, $locatorRegistry);
+        return $builder->buildFromConfig($configData);
     }
 }

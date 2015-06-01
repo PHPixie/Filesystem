@@ -15,7 +15,7 @@ class Directory implements \PHPixie\Filesystem\Locators\Locator
         $this->defaultExtension = $configData->get('defaultExtension', 'php');
     }
     
-    public function locate($path)
+    public function locate($path, $isDirectory = false)
     {
         $path = $this->directory.'/'.$path;
         $path = $this->root->path($path);
@@ -25,7 +25,10 @@ class Directory implements \PHPixie\Filesystem\Locators\Locator
             $path.='.'.$this->defaultExtension;
         }
         
-        if(!file_exists($path)) {
+        $exists = !$isDirectory && file_exists($path);
+        $exists = $exists || $isDirectory && is_dir($path);
+        
+        if(!$exists) {
             $path = null;
         }
         

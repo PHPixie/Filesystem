@@ -4,22 +4,30 @@ namespace PHPixie\Filesystem\Locators\Locator;
 
 class Prefix implements \PHPixie\Filesystem\Locators\Locator
 {
-    protected $locators = array();
+    protected $locatorBuilder;
+    protected $locatorsConfig;
     protected $defaultPrefix;
     
-    public function __construct($locators, $configData)
+    protected $locators = array();
+    
+    public function __construct($locatorBuilder, $configData)
     {
-        $this->defaultPrefix = $configData->get('defaultPrefix', 'default');
-        $locatorsConfig = $configData->slice('locators');
-        
-        foreach($locatorsConfig->keys(null, true) as $key) {
-            $locatorConfig = $locatorsConfig->slice($key);
-            $this->locators[$key] = $locators->buildFromConfig($locatorConfig);
-        }
+        $this->locatorBuilder = $locatorBuilder;
+        $this->locatorsConfig = $configData->slice('locators');
+        $this->defaultPrefix  = $configData->get('defaultPrefix', 'default');
     }
     
+    protected function locator($key)
+    {
+        if(!array_key_exists($name, $this->locators)) {
+            $locatorConfig = $locatorsConfig->slice($key);
+            $this->locators[$key] = $this->locatorBuilder->build($locatorConfig);
+        }
+        
+        return $this->locators[$key];
+    }
     
-    public function locate($name)
+    public function locate($name, $isDirectory = false)
     {
         $split = explode(':', $name, 2);
         if(count($split) > 1) {
@@ -30,6 +38,6 @@ class Prefix implements \PHPixie\Filesystem\Locators\Locator
             $name = $name;
         }
         
-        return $this->locators[$prefix]->locate($name);
+        return $this->locator($key)->locate($name, $isDirectory);
     }
 }

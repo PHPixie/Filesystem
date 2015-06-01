@@ -4,22 +4,35 @@ namespace PHPixie\Filesystem\Locators\Locator;
 
 class Group
 {
+    protected $locatorBuilder;
+    protected $locatorsConfig;
+    
     protected $locators = array();
     
-    public function __construct($locators, $configData)
+    public function __construct($locatorBuilder, $configData)
     {
-        $locatorsConfig = $configData->slice('locators');
-        foreach($locatorsConfig->keys(null, true) as $key) {
-            $locatorConfig = $locatorsConfig->slice($key);
-            $this->locators[] = $locators->buildFromConfig($locatorConfig);
-        }
+        $this->locatorBuilder = $locatorBuilder;
+        $this->locatorsConfig = $configData->slice('locators');
     }
     
-    public function locate($name)
+    protected function locators()
+    {
+        if($this->locators === null) {
+            $this->locators = array();
+            foreach($this->locatorsConfig->keys(null, true) as $key) {
+                $locatorConfig = $this->locatorsConfig->slice($key);
+                $this->locators[] = $locators->buildFromConfig($locatorConfig);
+            }
+        }
+        
+        return $this->locators;
+    }
+    
+    public function locate($name, $isDirectory = false)
     {
         $path = null;
-        foreach($this->locators as $locator) {
-            $path = $locator->locate($name);
+        foreach($this->locators() as $locator) {
+            $path = $locator->locate($name, $isDirectory);
             if($path !== null) {
                 break;
             }
