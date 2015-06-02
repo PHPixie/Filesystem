@@ -20,18 +20,20 @@ class Directory implements \PHPixie\Filesystem\Locators\Locator
         $path = $this->directory.'/'.$path;
         $path = $this->root->path($path);
         
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
-        if($extension === '') {
-            $path.='.'.$this->defaultExtension;
+        if(!$isDirectory) {
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            if($extension === '') {
+                $path.='.'.$this->defaultExtension;
+            }
+            
+            if(file_exists($path)) {
+                return $path;
+            }
+        
+        }elseif(is_dir($path)){
+            return $path;
         }
         
-        $exists = !$isDirectory && file_exists($path);
-        $exists = $exists || $isDirectory && is_dir($path);
-        
-        if(!$exists) {
-            $path = null;
-        }
-        
-        return $path;
+        return null;
     }
 }

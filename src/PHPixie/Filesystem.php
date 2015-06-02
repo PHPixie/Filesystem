@@ -6,9 +6,9 @@ class Filesystem
 {
     protected $builder;
     
-    public function __construct($rootDir, $locatorRegistry = null)
+    public function __construct()
     {
-        $this->builder = $this->buildBuilder($rootDir, $locatorRegistry);
+        $this->builder = $this->buildBuilder();
     }
     
     public function builder()
@@ -16,25 +16,27 @@ class Filesystem
         return $this->builder;
     }
     
-    public function root()
+    public function root($directory)
     {
-        return $this->builder->root();
+        return $this->builder->root($directory);
     }
     
-    public function rootPath($path = null)
-    {
-        $root = $this->builder->root();
-        return $root->path($path);
-    }
-    
-    public function locator($configData)
+    public function configLocatorRegistry($configData, $root, $locatorRegistry = null)
     {
         $locators = $this->builder->locators();
-        return $locators->buildFromConfig($configData);
+        $builder  = $locators->builder($root, $locatorRegistry);
+        return $locators->configRegistry($builder, $configData);
     }
     
-    protected function buildBuilder($rootDir, $locatorRegistry)
+    public function buildLocator($configData, $root, $locatorRegistry = null)
     {
-        return new Filesystem\Builder($rootDir, $locatorRegistry);
+        $locators = $this->builder->locators();
+        $builder  = $locators->builder($root, $locatorRegistry);
+        return $builder->buildFromConfig($configData);
+    }
+    
+    protected function buildBuilder()
+    {
+        return new Filesystem\Builder();
     }
 }

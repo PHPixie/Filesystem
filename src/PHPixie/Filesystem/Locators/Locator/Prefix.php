@@ -17,14 +17,14 @@ class Prefix implements \PHPixie\Filesystem\Locators\Locator
         $this->defaultPrefix  = $configData->get('defaultPrefix', 'default');
     }
     
-    protected function locator($key)
+    protected function locator($name)
     {
         if(!array_key_exists($name, $this->locators)) {
-            $locatorConfig = $locatorsConfig->slice($key);
-            $this->locators[$key] = $this->locatorBuilder->build($locatorConfig);
+            $locatorConfig = $this->locatorsConfig->slice($name);
+            $this->locators[$name] = $this->locatorBuilder->buildFromConfig($locatorConfig);
         }
         
-        return $this->locators[$key];
+        return $this->locators[$name];
     }
     
     public function locate($name, $isDirectory = false)
@@ -38,6 +38,6 @@ class Prefix implements \PHPixie\Filesystem\Locators\Locator
             $name = $name;
         }
         
-        return $this->locator($key)->locate($name, $isDirectory);
+        return $this->locator($prefix)->locate($name, $isDirectory);
     }
 }

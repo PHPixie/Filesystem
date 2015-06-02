@@ -7,44 +7,26 @@ namespace PHPixie\Tests\Filesystem\Locators\Locator;
  */
 class PrefixTest extends \PHPixie\Test\Testcase
 {
-    protected $resolverBuilder;
-    protected $configData;
+    protected $locatorBuilder;
+    protected $locatorsConfig;
+    protected $defaultPrefix = 'first';
     
-    protected $resolver;
-    
-    protected $defaultPrefix = 'default';
-    protected $resolvers;
+    protected $locator;
     
     public function setUp()
     {
-        $this->configData = $this->getData();
-        $this->resolverBuilder = $this->quickMock('\PHPixie\Filesystem\Locators');
         
-        $this->method($this->configData, 'get', $this->defaultPrefix, array('defaultPrefix', 'default'), 0);
+        $this->locatorBuilder = $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
         
-        $resolversConfig = $this->getData();
-        $this->method($this->configData, 'slice', $resolversConfig, array('locators'), 1);
+        $configData = $this->getData();
         
-        $this->resolvers = array(
-            'default' => $this->abstractMock('\PHPixie\Filesystem\Locators\Locator'),
-            'second'  => $this->abstractMock('\PHPixie\Filesystem\Locators\Locator'),
-        );
-        $this->method($resolversConfig, 'keys', array_keys($this->resolvers), array(null, true), 0);
+        $this->locatorsConfig = $this->getData();
+        $this->method($configData, 'slice', $this->locatorsConfig, array('locators'), 0);
+        $this->method($configData, 'get', $this->defaultPrefix, array('defaultPrefix', 'default'), 1);
         
-        $i=0;
-        
-        foreach($this->resolvers as $key => $resolver) {
-            $resolverConfig = $this->getData();
-            
-            $this->method($resolversConfig, 'slice', $resolverConfig, array($key), $i+1);
-            $this->method($this->resolverBuilder, 'buildFromConfig', $resolver, array($resolverConfig), $i);
-            
-            $i++;
-        }
-        
-        $this->resolver = new \PHPixie\Filesystem\Locators\Locator\Prefix(
-            $this->resolverBuilder,
-            $this->configData
+        $this->locator = new \PHPixie\Filesystem\Locators\Locator\Prefix(
+            $this->locatorBuilder,
+            $configData
         );
     }
     
@@ -63,11 +45,29 @@ class PrefixTest extends \PHPixie\Test\Testcase
      */
     public function testLocate()
     {
-        $this->method($this->resolvers['second'], 'locate', 'pixie', array('fairy'), 0);
-        $this->assertSame('pixie', $this->resolver->locate('second:fairy'));
+        $locator = $this->prepareLocator('second');
         
-        $this->method($this->resolvers['default'], 'locate', 'pixie', array('fairy'), 0);
-        $this->assertSame('pixie', $this->resolver->locate('fairy'));
+        $this->method($locator, 'locate', 'pixie', array('fairy', false), 0);
+        $this->assertSame('pixie', $this->locator->locate('second:fairy'));
+        
+        $this->method($locator, 'locate', 'pixie', array('fairy', true), 0);
+        $this->assertSame('pixie', $this->locator->locate('second:fairy', true));
+        
+        $locator = $this->prepareLocator('first');
+        
+        $this->method($locator, 'locate', 'pixie', array('fairy'), 0);
+        $this->assertSame('pixie', $this->locator->locate('fairy'));
+    }
+    
+    protected function prepareLocator($name)
+    {
+        $locator = $this->abstractMock('\PHPixie\Filesystem\Locators\Locator');
+        
+        $locatorConfig = $this->getData();
+        $this->method($this->locatorsConfig, 'slice', $locatorConfig, array($name), 0);
+        $this->method($this->locatorBuilder, 'buildFromConfig', $locator, array($locatorConfig), 0);
+        
+        return $locator;
     }
     
     protected function getData()

@@ -23,7 +23,7 @@ class Mount implements \PHPixie\Filesystem\Locators\Locator
     protected function locator()
     {
         if($this->locator === null) {
-            $name = $configData->getRequired('name');
+            $name = $this->configData->getRequired('name');
             $this->locator = $this->locatorRegistry->get($name);
         }
         

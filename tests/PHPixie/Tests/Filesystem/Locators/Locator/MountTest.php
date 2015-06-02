@@ -18,12 +18,7 @@ class MountTest extends \PHPixie\Test\Testcase
     public function setUp()
     {
         $this->locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
-        
         $this->configData = $this->quickMock('\PHPixie\Slice\Data');
-        $this->method($this->configData, 'getRequired', $this->name, array('name'), 0);
-        
-        $this->subLocator = $this->quickMock('\PHPixie\Filesystem\Locators\Locator');
-        $this->method($this->locatorRegistry, 'get', $this->subLocator, array($this->name), 0);
         
         $this->locator = new \PHPixie\Filesystem\Locators\Locator\Mount(
             $this->locatorRegistry,
@@ -46,7 +41,22 @@ class MountTest extends \PHPixie\Test\Testcase
      */
     public function testLocate()
     {
-        $this->method($this->subLocator, 'locate', 'trixie.php', array('pixie'), 0);
+        $locator = $this->prepareLocator();
+        
+        $this->method($locator, 'locate', 'trixie.php', array('pixie', false), 0);
         $this->assertSame('trixie.php', $this->locator->locate('pixie'));
+        
+        $this->method($locator, 'locate', 'trixie.php', array('pixie', true), 0);
+        $this->assertSame('trixie.php', $this->locator->locate('pixie', true));
+    }
+    
+    protected function prepareLocator()
+    {
+        $this->method($this->configData, 'getRequired', $this->name, array('name'), 0);
+        
+        $locator = $this->quickMock('\PHPixie\Filesystem\Locators\Locator');
+        $this->method($this->locatorRegistry, 'get', $locator, array($this->name), 0);
+        
+        return $locator;
     }
 }

@@ -7,53 +7,59 @@ class Locators
     protected $builder;
     protected $locatorRegistry;
     
-    protected $locators = array(
-        'directory',
-        'group',
-        'prefix',
-        'mount'
-    );
-    
-    public function __construct($builder, $locatorRegistry = null)
+    public function __construct($builder)
     {
-        $this->builder         = $builder;
-        $this->locatorRegistry = $locatorRegistry;
+        $this->builder = $builder;
     }
     
-    public function directory($configData)
+    public function directory($root, $configData)
     {
         return new Locators\Locator\Directory(
-            $this->builder->root(),
+            $root,
             $configData
         );
     }
     
-    public function group($configData)
+    public function group($locatorBuilder, $configData)
     {
         return new Locators\Locator\Group(
-            $this,
+            $locatorBuilder,
             $configData
         );
     }
     
-    public function prefix($configData)
+    public function prefix($locatorBuilder, $configData)
     {
         return new Locators\Locator\Prefix(
-            $this,
+            $locatorBuilder,
             $configData
         );
     }
     
-    public function mount($configData)
+    public function mount($locatorRegistry, $configData)
     {
         return new Locators\Locator\Mount(
-            $this->locatorRegistry,
+            $locatorRegistry,
             $configData
         );
     }
     
-    public function build($configData, $rootPath = null, $locatorRegistry = null) {
-        $builder = $this->locatorBuilder($rootPath, $locatorRegistry);
-        return $builder->buildFromConfig($configData);
+    public function builder($root, $locatorRegistry = null)
+    {
+        return new Locators\Builder(
+            $this,
+            $root,
+            $locatorRegistry
+        );
     }
+    
+    
+    public function configRegistry($builder, $configData)
+    {
+        return new Locators\Registry\Config(
+            $builder,
+            $configData
+        );
+    }
+
 }

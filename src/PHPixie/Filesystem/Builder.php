@@ -4,44 +4,29 @@ namespace PHPixie\Filesystem;
 
 class Builder
 {
-    protected $rootDir;
-    protected $locatorRegistry;
+    protected $locators;
     
-    protected $instances = array();
-    
-    public function __construct($rootDir, $locatorRegistry = null)
+    public function __construct()
     {
-        $this->rootDir         = $rootDir;
-        $this->locatorRegistry = $locatorRegistry;
+        
     }
     
-    public function root()
+    public function root($directory)
     {
-        return $this->instance('root');
+        return new Root($directory);
     }
     
     public function locators()
     {
-        return $this->instance('locators');
-    }
-    
-    protected function buildRoot()
-    {
-        return new Root($this->rootDir);
+        if($this->locators === null) {
+            $this->locators = $this->buildLocators();
+        }
+        
+        return $this->locators;
     }
     
     protected function buildLocators()
     {
-        return new Locators($this, $this->locatorRegistry);
-    }
-    
-    protected function instance($name)
-    {
-        if(!array_key_exists($name, $this->instances)) {
-            $method = 'build'.ucfirst($name);
-            $this->instances[$name] = $this->$method();
-        }
-        
-        return $this->instances[$name];
+        return new Locators($this);
     }
 }

@@ -7,9 +7,6 @@ namespace PHPixie\Tests;
  */
 class FilesystemTest extends \PHPixie\Test\Testcase
 {
-    protected $rootDir = '/pixie/';
-    protected $locatorRegistry;
-    
     protected $filesystem;
     
     protected $builder;
@@ -19,26 +16,15 @@ class FilesystemTest extends \PHPixie\Test\Testcase
     
     public function setUp()
     {
-        $this->locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
-        
         $this->filesystem = $this->getMockBuilder('\PHPixie\Filesystem')
             ->setMethods(array('buildBuilder'))
             ->disableOriginalConstructor()
             ->getMock();
         
         $this->builder = $this->quickMock('\PHPixie\Filesystem\Builder');
-        $this->method($this->filesystem, 'buildBuilder', $this->builder, array(
-            $this->rootDir,
-            $this->locatorRegistry
-        ), 0);
+        $this->method($this->filesystem, 'buildBuilder', $this->builder, array(), 0);
         
-        $this->filesystem->__construct(
-            $this->rootDir,
-            $this->locatorRegistry
-        );
-        
-        $this->root = $this->quickMock('\PHPixie\Filesystem\Root');
-        $this->method($this->builder, 'root', $this->root, array());
+        $this->filesystem->__construct();
         
         $this->locators = $this->quickMock('\PHPixie\Filesystem\Locators');
         $this->method($this->builder, 'locators', $this->locators, array());
@@ -68,33 +54,81 @@ class FilesystemTest extends \PHPixie\Test\Testcase
      */
     public function testRoot()
     {
-        $this->assertSame($this->root, $this->filesystem->root());
+        $root = $this->quickMock('\PHPixie\Filesystem\Root');
+        $this->method($this->builder, 'root', $root, array('/pixie'), 0);
+
+        $this->assertSame($root, $this->filesystem->root('/pixie'));
     }
     
     /**
-     * @covers ::rootPath
+     * @covers ::buildLocator
      * @covers ::<protected>
      */
-    public function testRootPath()
-    {
-        $this->method($this->root, 'path', '/pixie/trixie', array('trixie'), 0);
-        $this->assertSame('/pixie/trixie', $this->filesystem->rootPath('trixie'));
-        
-        $this->method($this->root, 'path', '/pixie/', array(null), 0);
-        $this->assertSame('/pixie/', $this->filesystem->rootPath());
-    }
-    
-    /**
-     * @covers ::locator
-     * @covers ::<protected>
-     */
-    public function testLocator()
+    public function testBuildLocator()
     {
         $configData = $this->quickMock('\PHPixie\Slice\Data');
+        $root       = $this->quickMock('\PHPixie\Filesystem\Root');
+        
+        $builder = $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
         $locator = $this->quickMock('\PHPixie\Filesystem\Locators\Locator');
         
-        $this->method($this->locators, 'buildFromConfig', $locator, array($configData), 0);
-        $this->assertSame($locator, $this->filesystem->locator($configData));
+        $this->method($builder, 'buildFromConfig', $locator, array($configData));
+        
+        foreach(array(false, true) as $withLocatorRegistry) {
+            if($withLocatorRegistry) {
+                $locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
+            }else{
+                $locatorRegistry = null;
+            }
+            
+            $this->method($this->locators, 'builder', $builder, array($root, $locatorRegistry), 0);
+            
+            $params = array($configData, $root);
+            if($withLocatorRegistry) {
+                $params[]= $locatorRegistry;
+            }
+            
+            $result = call_user_func_array(array($this->filesystem, 'buildLocator'), $params);
+            $this->assertSame($locator, $result);
+        }
+    }
+    
+    /**
+     * @covers ::configLocatorRegistry
+     * @covers ::<protected>
+     */
+    public function testConfigLocatorRegistry()
+    {
+        $configData = $this->quickMock('\PHPixie\Slice\Data');
+        $root       = $this->quickMock('\PHPixie\Filesystem\Root');
+        
+        $builder        = $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
+        $configRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry\Config');
+        
+        foreach(array(false, true) as $withLocatorRegistry) {
+            if($withLocatorRegistry) {
+                $locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
+            }else{
+                $locatorRegistry = null;
+            }
+            
+            $this->method($this->locators, 'builder', $builder, array($root, $locatorRegistry), 0);
+            $this->method(
+                $this->locators,
+                'configRegistry',
+                $configRegistry,
+                array($builder, $configData),
+                1
+            );
+            
+            $params = array($configData, $root);
+            if($withLocatorRegistry) {
+                $params[]= $locatorRegistry;
+            }
+            
+            $result = call_user_func_array(array($this->filesystem, 'configLocatorRegistry'), $params);
+            $this->assertSame($configRegistry, $result);
+        }
     }
     
     /**
@@ -103,25 +137,9 @@ class FilesystemTest extends \PHPixie\Test\Testcase
      */
     public function testBuildBuilder()
     {
-        $this->filesystem = new \PHPixie\Filesystem(
-            $this->rootDir,
-            $this->locatorRegistry
-        );
+        $this->filesystem = new \PHPixie\Filesystem();
         
         $builder = $this->filesystem->builder();
-        $this->assertInstance($builder, '\PHPixie\Filesystem\Builder', array(
-            'rootDir'         => $this->rootDir,
-            'locatorRegistry' => $this->locatorRegistry
-        ));
-        
-        $this->filesystem = new \PHPixie\Filesystem(
-            $this->rootDir
-        );
-        
-        $builder = $this->filesystem->builder();
-        $this->assertInstance($builder, '\PHPixie\Filesystem\Builder', array(
-            'rootDir'         => $this->rootDir,
-            'locatorRegistry' => null
-        ));
+        $this->assertInstance($builder, '\PHPixie\Filesystem\Builder');
     }
 }

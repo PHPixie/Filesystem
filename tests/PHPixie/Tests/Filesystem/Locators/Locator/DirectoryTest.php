@@ -26,7 +26,7 @@ class DirectoryTest extends \PHPixie\Test\Testcase
         $this->root = $this->abstractMock('\PHPixie\Filesystem\Root');
         $rootDirectory = $this->rootDirectory;
         $this->method($this->root, 'path', function($path) use($rootDirectory){
-            return $rootDirectory.$path;
+            return preg_replace('#/+#', '/', $rootDirectory.$path);
         });
         
         $this->configData = $this->abstractMock('\PHPixie\Slice\Data');
@@ -79,15 +79,18 @@ class DirectoryTest extends \PHPixie\Test\Testcase
      */
     public function testLocate()
     {
-        $file = $this->fullDirectory.'/fairy.php';
+        $file = $this->fullDirectory.'fairy.php';
         file_put_contents($file, '');
         
         $this->assertSame($file, $this->locator->locate('fairy'));
         
-        $file = $this->fullDirectory.'/fairy.haml';
+        $file = $this->fullDirectory.'fairy.haml';
         file_put_contents($file, '');
         
         $this->assertSame($file, $this->locator->locate('fairy.haml'));
         $this->assertSame(null, $this->locator->locate('pixie.haml'));
+        
+        $this->assertSame(null, $this->locator->locate('fairy.haml', true));
+        $this->assertSame($this->fullDirectory, $this->locator->locate('/', true));
     }
 }

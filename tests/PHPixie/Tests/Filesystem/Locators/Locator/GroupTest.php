@@ -8,35 +8,21 @@ namespace PHPixie\Tests\Filesystem\Locators\Locator;
 class GroupTest extends \PHPixie\Test\Testcase
 {
     protected $locatorBuilder;
-    protected $configData;
+    protected $locatorsConfig;
     
     protected $locator;
     
-    protected $locators;
-    
     public function setUp()
     {
-        $this->configData = $this->getData();
-        $this->locatorBuilder = $this->quickMock('\PHPixie\Filesystem\Locators');
+        $configData = $this->getData();
+        $this->locatorBuilder = $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
         
-        $locatorsConfig = $this->getData();
-        $this->method($this->configData, 'slice', $locatorsConfig, array('locators'), 0);
-        
-        $this->method($locatorsConfig, 'keys', array(0, 1), array(null, true), 0);
-        
-        for($i=0; $i<2; $i++) {
-            $locatorConfig = $this->getData();
-            $locator = $this->abstractMock('\PHPixie\Filesystem\Locators\Locator');
-            
-            $this->method($locatorsConfig, 'slice', $locatorConfig, array($i), $i+1);
-            $this->method($this->locatorBuilder, 'buildFromConfig', $locator, array($locatorConfig), $i);
-            
-            $this->locators[] = $locator;
-        }
-        
+        $this->locatorsConfig = $this->getData();
+        $this->method($configData, 'slice', $this->locatorsConfig, array('locators'), 0);
+    
         $this->locator = new \PHPixie\Filesystem\Locators\Locator\Group(
             $this->locatorBuilder,
-            $this->configData
+            $configData
         );
     }
     
@@ -55,14 +41,44 @@ class GroupTest extends \PHPixie\Test\Testcase
      */
     public function testLocate()
     {
-        foreach(array('pixie', null) as $path) {
-            foreach($this->locators as $key => $locator) {
-                $locatorPath = $key == 1 ? $path : null;
-                $this->method($locator, 'locate', $locatorPath, array('fairy'), 0);
+        $locators = $this->prepareLocators();
+        
+        foreach(array(false) as $isDirectory) {
+            foreach(array('pixie', null) as $path) {
+                foreach($locators as $key => $locator) {
+                    $locatorPath = $key == 1 ? $path : null;
+                    $this->method($locator, 'locate', $locatorPath, array('fairy', $isDirectory), 0);
+                }
+                
+                $params = array('fairy');
+                if($isDirectory) {
+                    $params[]= true;
+                }
+                
+                $result = call_user_func_array(array($this->locator, 'locate'), $params);
+                $this->assertSame($path, $result);
             }
-            
-            $this->assertSame($path, $this->locator->locate('fairy'));
         }
+    }
+    
+    
+    protected function prepareLocators()
+    {
+        $this->method($this->locatorsConfig, 'keys', array(0, 1), array(null, true), 0);
+        
+        $locators = array();
+        
+        for($i=0; $i<2; $i++) {
+            $locatorConfig = $this->getData();
+            $locator = $this->abstractMock('\PHPixie\Filesystem\Locators\Locator');
+            
+            $this->method($this->locatorsConfig, 'slice', $locatorConfig, array($i), $i+1);
+            $this->method($this->locatorBuilder, 'buildFromConfig', $locator, array($locatorConfig), $i);
+            
+            $locators[] = $locator;
+        }
+        
+        return $locators;
     }
     
     protected function getData()

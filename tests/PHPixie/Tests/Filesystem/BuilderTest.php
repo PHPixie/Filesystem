@@ -7,18 +7,11 @@ namespace PHPixie\Tests\Filesystem;
  */
 class BuilderTest extends \PHPixie\Test\Testcase
 {
-    protected $rootDir = '/pixie/';
-    protected $locatorRegistry;
-    
     protected $builders;
     
     public function setUp()
     {
-        $this->locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
-        $this->builder = new \PHPixie\Filesystem\Builder(
-            $this->rootDir,
-            $this->locatorRegistry
-        );
+        $this->builder = new \PHPixie\Filesystem\Builder();
     }
     
     /**
@@ -36,12 +29,10 @@ class BuilderTest extends \PHPixie\Test\Testcase
      */
     public function testRoot()
     {
-        $root = $this->builder->root();
+        $root = $this->builder->root('/pixie/');
         $this->assertInstance($root, '\PHPixie\Filesystem\Root', array(
-            'path' => $this->rootDir
+            'path' => '/pixie/'
         ));
-        
-        $this->assertSame($root, $this->builder->root());
     }
     
     /**
@@ -52,16 +43,9 @@ class BuilderTest extends \PHPixie\Test\Testcase
     {
         $locators = $this->builder->locators();
         $this->assertInstance($locators, '\PHPixie\Filesystem\Locators', array(
-            'builder'         => $this->builder,
-            'locatorRegistry' => $this->locatorRegistry,
+            'builder' => $this->builder
         ));
         
         $this->assertSame($locators, $this->builder->locators());
-        
-        $this->builder = new \PHPixie\Filesystem\Builder($this->rootDir);
-        $this->assertInstance($this->builder->locators(), '\PHPixie\Filesystem\Locators', array(
-            'builder'         => $this->builder,
-            'locatorRegistry' => null,
-        ));
     }
 }

@@ -7,7 +7,7 @@ class Group
     protected $locatorBuilder;
     protected $locatorsConfig;
     
-    protected $locators = array();
+    protected $locators;
     
     public function __construct($locatorBuilder, $configData)
     {
@@ -21,7 +21,7 @@ class Group
             $this->locators = array();
             foreach($this->locatorsConfig->keys(null, true) as $key) {
                 $locatorConfig = $this->locatorsConfig->slice($key);
-                $this->locators[] = $locators->buildFromConfig($locatorConfig);
+                $this->locators[] = $this->locatorBuilder->buildFromConfig($locatorConfig);
             }
         }
         
