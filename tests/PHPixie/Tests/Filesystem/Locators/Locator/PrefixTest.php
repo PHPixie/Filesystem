@@ -40,6 +40,19 @@ class PrefixTest extends \PHPixie\Test\Testcase
     }
     
     /**
+     * @covers ::get
+     * @covers ::<protected>
+     */
+    public function testGet()
+    {
+        $locator = $this->prepareLocator('second');
+        
+        for($i=0; $i<2; $i++) {
+            $this->assertSame($locator, $this->locator->get('second'));
+        }
+    }
+    
+    /**
      * @covers ::locate
      * @covers ::<protected>
      */

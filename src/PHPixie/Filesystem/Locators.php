@@ -52,14 +52,4 @@ class Locators
             $locatorRegistry
         );
     }
-    
-    
-    public function configRegistry($builder, $configData)
-    {
-        return new Locators\Registry\Config(
-            $builder,
-            $configData
-        );
-    }
-
 }

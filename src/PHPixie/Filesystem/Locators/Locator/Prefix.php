@@ -2,7 +2,8 @@
 
 namespace PHPixie\Filesystem\Locators\Locator;
 
-class Prefix implements \PHPixie\Filesystem\Locators\Locator
+class Prefix implements \PHPixie\Filesystem\Locators\Locator,
+                        \PHPixie\Filesystem\Locators\Registry
 {
     protected $locatorBuilder;
     protected $locatorsConfig;
@@ -17,7 +18,7 @@ class Prefix implements \PHPixie\Filesystem\Locators\Locator
         $this->defaultPrefix  = $configData->get('defaultPrefix', 'default');
     }
     
-    protected function locator($name)
+    public function get($name)
     {
         if(!array_key_exists($name, $this->locators)) {
             $locatorConfig = $this->locatorsConfig->slice($name);
@@ -38,6 +39,6 @@ class Prefix implements \PHPixie\Filesystem\Locators\Locator
             $name = $name;
         }
         
-        return $this->locator($prefix)->locate($name, $isDirectory);
+        return $this->get($prefix)->locate($name, $isDirectory);
     }
 }

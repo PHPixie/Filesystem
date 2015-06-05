@@ -94,44 +94,6 @@ class FilesystemTest extends \PHPixie\Test\Testcase
     }
     
     /**
-     * @covers ::configLocatorRegistry
-     * @covers ::<protected>
-     */
-    public function testConfigLocatorRegistry()
-    {
-        $configData = $this->quickMock('\PHPixie\Slice\Data');
-        $root       = $this->quickMock('\PHPixie\Filesystem\Root');
-        
-        $builder        = $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
-        $configRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry\Config');
-        
-        foreach(array(false, true) as $withLocatorRegistry) {
-            if($withLocatorRegistry) {
-                $locatorRegistry = $this->quickMock('\PHPixie\Filesystem\Locators\Registry');
-            }else{
-                $locatorRegistry = null;
-            }
-            
-            $this->method($this->locators, 'builder', $builder, array($root, $locatorRegistry), 0);
-            $this->method(
-                $this->locators,
-                'configRegistry',
-                $configRegistry,
-                array($builder, $configData),
-                1
-            );
-            
-            $params = array($configData, $root);
-            if($withLocatorRegistry) {
-                $params[]= $locatorRegistry;
-            }
-            
-            $result = call_user_func_array(array($this->filesystem, 'configLocatorRegistry'), $params);
-            $this->assertSame($configRegistry, $result);
-        }
-    }
-    
-    /**
      * @covers ::buildBuilder
      * @covers ::<protected>
      */

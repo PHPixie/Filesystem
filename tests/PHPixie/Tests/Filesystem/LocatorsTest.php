@@ -129,22 +129,6 @@ class LocatorsTest extends \PHPixie\Test\Testcase
         ));
     }
     
-    /**
-     * @covers ::configRegistry
-     * @covers ::<protected>
-     */
-    public function testConfigRegistry()
-    {
-        $locatorBuilder = $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
-        $configData     = $this->getData();
-        
-        $locatorRegistry = $this->locators->configRegistry($locatorBuilder, $configData);
-        $this->assertInstance($locatorRegistry, '\PHPixie\Filesystem\Locators\Registry\Config', array(
-            'locatorBuilder' => $locatorBuilder,
-            'configData'     => $configData
-        ));
-    }
-    
     protected function getLocatorBuilder()
     {
         return $this->quickMock('\PHPixie\Filesystem\Locators\Builder');
