@@ -5,6 +5,7 @@ namespace PHPixie\Filesystem;
 class Builder
 {
     protected $locators;
+    protected $actions;
     
     public function __construct()
     {
@@ -25,8 +26,22 @@ class Builder
         return $this->locators;
     }
     
+    public function actions()
+    {
+        if($this->actions === null) {
+            $this->actions = $this->buildActions();
+        }
+        
+        return $this->actions;
+    }
+    
     protected function buildLocators()
     {
         return new Locators($this);
+    }
+    
+    protected function buildActions()
+    {
+        return new Actions();
     }
 }

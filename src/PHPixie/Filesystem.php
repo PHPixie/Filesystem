@@ -21,6 +21,11 @@ class Filesystem
         return $this->builder->root($directory);
     }
     
+    public function actions()
+    {
+        return $this->builder->actions();
+    }
+    
     public function buildLocator($configData, $root, $locatorRegistry = null)
     {
         $locators = $this->builder->locators();
