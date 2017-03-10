@@ -21,7 +21,7 @@ class Prefix implements \PHPixie\Filesystem\Locators\Locator,
     public function get($name, $checkMissing = false)
     {
         if(!array_key_exists($name, $this->locators)) {
-            if($checkMissing && !array_key_exists($name, $this->locatorsConfig->get()) {
+            if($checkMissing && !array_key_exists($name, $this->locatorsConfig->get())) {
                 return null;
             }
             
